@@ -6,7 +6,7 @@ typedef enum {
     TOKEN_ERROR,
 
     // keywords
-    LET, IF, THEN, LOOP, ENDLOOP, PRINT,
+    LET, IF, THEN, ENDIF, LOOP, ENDLOOP, PRINT,
 
     // user tokens
     ID, STRING, NUMBER,
@@ -19,8 +19,14 @@ typedef enum {
 
     // separators
     LPAREN, RPAREN, SEMICOLON
-
-
 } TokenType;
+
+typedef struct {
+    TokenType type;
+    union {
+        int int_value;
+        char *string_value;
+    };
+} Token;
 
 #endif //HEMATC_TOKENS_H

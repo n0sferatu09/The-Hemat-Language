@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include "lexer/lexer.h"
+#include "hematc.h"
 
 int main(int argc, char *argv[]) {
 #if 0
@@ -12,6 +13,7 @@ int main(int argc, char *argv[]) {
 #endif
 
     FILE *file = fopen("../syntax.hm", "r");
+    lexer(file);
 
     if (!file) {
         perror("fopen");
