@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "hematc.h"
+#include "hashtable/hashtable.h"
+#include "vector/vector.h"
+#include "lexer/lexer.h"
+#include "parser/parser.h"
 
 int main(int argc, char *argv[]) {
 #if 0
@@ -12,13 +15,14 @@ int main(int argc, char *argv[]) {
     }
 #endif
 
-    FILE *file = fopen("../syntax.hm", "r");
-    lexer(file);
+    FILE *file = fopen("../test.hm", "r");
 
     if (!file) {
         perror("fopen");
         return 1;
     }
+
+    parser(file);
 
     fclose(file);
     return 0;

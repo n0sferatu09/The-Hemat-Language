@@ -24,9 +24,21 @@ typedef enum {
 typedef struct {
     TokenType type;
     union {
-        int int_value;
+        long long int int_value;
         char *string_value;
     };
 } Token;
+
+typedef struct {
+    Token **tokens;
+    int capacity;
+    int count;
+} TokenList;
+
+TokenList* create_token_list(void);
+Token* get_token(TokenList *token_list, int index);
+void add_token(TokenList *token_list, Token *token);
+void free_token_list(TokenList *token_list);
+int get_count(TokenList *token_list);
 
 #endif //HEMATC_TOKENS_H

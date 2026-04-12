@@ -1,0 +1,3 @@
+let x = 5535;
+print "X is ";
+print x;
