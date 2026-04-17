@@ -7,17 +7,17 @@
 #include "../lexer/lexer.h"
 #include "ast/ast.h"
 
-static Token* peek(TokenList *token_list, int pos) {
+static Token* peek(TokenList *token_list, const int pos) {
     return get_token(token_list, pos);
 }
 
-static bool match(TokenList *token_list, int pos, TokenType token_type) {
+static bool match(TokenList *token_list, const int pos, const TokenType token_type) {
     Token *token = peek(token_list, pos);
     if (!token) return false;
     return token->type == token_type;
 }
 
-static Token* consume(TokenList *token_list, int *pos, TokenType token_type) {
+static Token* consume(TokenList *token_list, int *pos, const TokenType token_type) {
     if (!match(token_list, *pos, token_type)) {
         fprintf(stderr, "Syntax error: expected token %d", token_type);
         exit(-1);
@@ -62,7 +62,7 @@ static ASTNode* parse_expression(TokenList *token_list, int *pos) {
 static ASTNode* parse_let_statement(TokenList *token_list, int *pos) {
     consume(token_list, pos, LET);
 
-    Token *token = consume(token_list, pos, ID);
+    const Token *token = consume(token_list, pos, ID);
 
     consume(token_list, pos, ASSIGN);
 
@@ -89,12 +89,32 @@ static ASTNode* parse_print_statement(TokenList *token_list, int *pos) {
     return node;
 }
 
+static ASTNode* parse_if_statement(TokenList *token_list, int *pos) {
+    consume(token_list, pos, IF);
+
+    ASTNode *condition = parse_expression(token_list, pos);
+    if (!condition) return NULL;
+
+    consume(token_list, pos, THEN);
+
+}
+
 void parser(FILE *file) {
     TokenList *token_list = lexer(file);
     int pos = 0;
 
-    parse_let_statement(token_list, &pos);
-    parse_print_statement(token_list, &pos);
-    parse_print_statement(token_list, &pos);
-    printf("Hello, World!\n");
+
+    const size_t length = token_list->count;
+    size_t i = 0;
+    while (i != length) {
+        const Token *current_token = peek(token_list, pos);
+
+        if (current_token->type == LET) {
+            parse_let_statement(token_list, &pos);
+        } else if (current_token->type == PRINT) {
+            parse_print_statement(token_list, &pos);
+        }
+
+        i++;
+    }
 }
