@@ -1,7 +1,7 @@
 #ifndef HEMATC_AST_H
 #define HEMATC_AST_H
 
-#include "../../lexer/tokens/tokens.h"
+#include "../lexer/tokens/tokens.h"
 
 typedef enum {
     PROGRAM,
@@ -16,11 +16,12 @@ typedef enum {
 
 typedef struct ASTNode{
     NodeType type;
+    long long int int_value;
+    char *string_value;
+
     struct ASTNode *next;
     struct ASTNode *left;
     struct ASTNode *right;
-    char *string_value;
-    long long int int_value;
 } ASTNode;
 
 ASTNode* create_node(NodeType type);

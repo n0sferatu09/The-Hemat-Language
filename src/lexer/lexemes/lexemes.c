@@ -5,7 +5,6 @@
 HashTable* init_keywords_table(void) {
     HashTable *table = create_table(TABLE_SIZE);
 
-
     insert(table, "let", LET);
     insert(table, "if", IF);
     insert(table, "then", THEN);

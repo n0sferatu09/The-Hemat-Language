@@ -14,4 +14,6 @@ ASTNode* create_node(NodeType type) {
     node->right = NULL;
     node->string_value = NULL;
     node->int_value = 0;
+
+    return node;
 }

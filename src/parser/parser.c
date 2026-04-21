@@ -5,7 +5,13 @@
 
 #include "../lexer/tokens/tokens.h"
 #include "../lexer/lexer.h"
-#include "ast/ast.h"
+#include "../ast/ast.h"
+
+static ASTNode* parse_expression(TokenList *token_list, int *pos);
+static ASTNode* parse_print_statement(TokenList *token_list, int *pos);
+static ASTNode* parse_let_statement(TokenList *token_list, int *pos);
+static ASTNode* parse_if_statement(TokenList *token_list, int *pos);
+static ASTNode* parse_statements(TokenList *token_list, int *pos);
 
 static Token* peek(TokenList *token_list, const int pos) {
     return get_token(token_list, pos);
@@ -89,6 +95,7 @@ static ASTNode* parse_print_statement(TokenList *token_list, int *pos) {
     return node;
 }
 
+
 static ASTNode* parse_if_statement(TokenList *token_list, int *pos) {
     consume(token_list, pos, IF);
 
@@ -97,24 +104,98 @@ static ASTNode* parse_if_statement(TokenList *token_list, int *pos) {
 
     consume(token_list, pos, THEN);
 
+    ASTNode *body = parse_statements(token_list, pos);
+    if (!body) return NULL;
+
+    consume(token_list, pos, ENDIF);
+    consume(token_list, pos, SEMICOLON);
+    ASTNode *node = create_node(IF_STATEMENT);
+    node->left = condition;
+    node->right = body;
+
+    return node;
+}
+
+static ASTNode* parse_statements(TokenList *token_list, int *pos) {
+    ASTNode *first = NULL;
+    ASTNode *last = NULL;
+
+    while (*pos < token_list->count) {
+        Token *token = peek(token_list, *pos);
+        if (!token) {
+            break;
+        }
+
+        if (token->type == ENDIF) {
+            break;
+        }
+
+        ASTNode *stmt = NULL;
+
+        switch (token->type) {
+            case LET:
+                stmt = parse_let_statement(token_list, pos);
+                break;
+            case PRINT:
+                stmt = parse_print_statement(token_list, pos);
+                break;
+            case IF:
+                stmt = parse_if_statement(token_list, pos);
+                break;
+            default:
+                fprintf(stderr, "Syntax error: unexpected token %d\n", token->type);
+                return NULL;
+        }
+        if (!stmt) return NULL;
+
+        if (!first) {
+            first = stmt;
+            last = stmt;
+        } else {
+            last->next = stmt;
+            last = stmt;
+        }
+    }
+
+    return first;
 }
 
 void parser(FILE *file) {
     TokenList *token_list = lexer(file);
     int pos = 0;
 
+    ASTNode *program = create_node(PROGRAM);
+    ASTNode *last_statement = NULL;
 
-    const size_t length = token_list->count;
-    size_t i = 0;
-    while (i != length) {
+    while (pos < token_list->count) {
         const Token *current_token = peek(token_list, pos);
 
+        ASTNode *stmt = NULL;
+
         if (current_token->type == LET) {
-            parse_let_statement(token_list, &pos);
+            stmt = parse_let_statement(token_list, &pos);
         } else if (current_token->type == PRINT) {
-            parse_print_statement(token_list, &pos);
+            stmt = parse_print_statement(token_list, &pos);
+        } else if (current_token->type == IF) {
+            stmt = parse_if_statement(token_list, &pos);
+        } else {
+            fprintf(stderr, "Unexpected token at position %d\n", pos);
+            break;
         }
 
-        i++;
+        if (!stmt) {
+            fprintf(stderr, "Failed to parse statement\n");
+            break;
+        }
+
+        if (!program->right) {
+            program->right = stmt;
+            last_statement = stmt;
+        } else {
+            last_statement->next = stmt;
+            last_statement = stmt;
+        }
     }
+
+    free_token_list(token_list);
 }

@@ -1,3 +1,7 @@
 let x = 5535;
-print "X is ";
-print x;
+if x then
+    if x then
+        print x;
+    endif;
+    print x;
+endif;
