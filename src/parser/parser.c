@@ -116,6 +116,14 @@ static ASTNode* parse_if_statement(TokenList *token_list, int *pos) {
     return node;
 }
 
+static ASTNode* parse_loop_statements(TokenList *token_list, int *pos) {
+    consume(token_list, pos, LOOP);
+
+    ASTNode *body = parse_statements(token_list, pos);
+
+    consume(token_list, pos, ENDLOOP);
+}
+
 static ASTNode* parse_statements(TokenList *token_list, int *pos) {
     ASTNode *first = NULL;
     ASTNode *last = NULL;
@@ -196,6 +204,8 @@ void parser(FILE *file) {
             last_statement = stmt;
         }
     }
+    print_ast(program);
+    free_ast(program);
 
     free_token_list(token_list);
 }
