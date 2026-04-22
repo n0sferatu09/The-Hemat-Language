@@ -14,7 +14,7 @@ typedef struct HashTable {
 
 HashTable* create_table(int size);
 void insert(HashTable *hashtable, const char *key, int value);
-int get(HashTable *hashtable, const char *key);
+int get_value(HashTable *hashtable, const char *key);
 void free_table(HashTable *hashtable);
 
 #endif //HEMATC_HASHTABLE_H

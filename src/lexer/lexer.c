@@ -29,7 +29,7 @@ Token* get_keyword_token(FILE *file, Vector* vector, HashTable *keywords, int fi
     ungetc(current, file);
 
     char *lexeme = get_string(vector);
-    int token_type = get(keywords, lexeme);
+    int token_type = get_value(keywords, lexeme);
 
     if (token_type != -1) {
         token->type = token_type;
@@ -109,7 +109,7 @@ Token* get_operator_token(FILE *file, HashTable *operators, int first_symbol) {
     if (second_symbol != EOF) {
         buffer[1] = (char)second_symbol;
 
-        int token_type = get(operators, buffer);
+        int token_type = get_value(operators, buffer);
         if (token_type != -1) {
             token->type = token_type;
             token->string_value = strdup(buffer);
@@ -120,7 +120,7 @@ Token* get_operator_token(FILE *file, HashTable *operators, int first_symbol) {
     }
 
     buffer[1] = '\0';
-    int token_type = get(operators, buffer);
+    int token_type = get_value(operators, buffer);
     if (token_type != -1) {
         token->type = token_type;
         token->string_value = strdup(buffer);
@@ -147,9 +147,10 @@ TokenList *lexer(FILE *file) {
         if (current == '/') {
             int next = fgetc(file);
             if (next == '/') {
-                while ((current = fgetc(file)) != '\n' && current != EOF);
-                current = fgetc(file);
-                continue;
+                while ((current = fgetc(file)) != '\n' && current != EOF) {
+                    current = fgetc(file);
+                    continue;
+                }
             } else {
                 ungetc(next, file);
             }

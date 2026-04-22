@@ -37,7 +37,7 @@ void insert(HashTable *hashtable, const char *key, int value) {
     hashtable->buckets[index] = new_entry;
 }
 
-int get(HashTable *hashtable, const char *key) {
+int get_value(HashTable *hashtable, const char *key) {
     if (!hashtable) {
         fprintf(stderr, "Hashtable is not exists!\n");
         exit(-1);

@@ -11,6 +11,7 @@ static ASTNode* parse_expression(TokenList *token_list, int *pos);
 static ASTNode* parse_print_statement(TokenList *token_list, int *pos);
 static ASTNode* parse_let_statement(TokenList *token_list, int *pos);
 static ASTNode* parse_if_statement(TokenList *token_list, int *pos);
+static ASTNode* parse_loop_statements(TokenList *token_list, int *pos);
 static ASTNode* parse_statements(TokenList *token_list, int *pos);
 
 static Token* peek(TokenList *token_list, const int pos) {
@@ -95,7 +96,6 @@ static ASTNode* parse_print_statement(TokenList *token_list, int *pos) {
     return node;
 }
 
-
 static ASTNode* parse_if_statement(TokenList *token_list, int *pos) {
     consume(token_list, pos, IF);
 
@@ -120,8 +120,14 @@ static ASTNode* parse_loop_statements(TokenList *token_list, int *pos) {
     consume(token_list, pos, LOOP);
 
     ASTNode *body = parse_statements(token_list, pos);
+    if (!body) return NULL;
 
     consume(token_list, pos, ENDLOOP);
+    consume(token_list, pos, SEMICOLON);
+    ASTNode *node = create_node(LOOP_STATEMENT);
+    node->right = body;
+
+    return node;
 }
 
 static ASTNode* parse_statements(TokenList *token_list, int *pos) {
@@ -134,7 +140,7 @@ static ASTNode* parse_statements(TokenList *token_list, int *pos) {
             break;
         }
 
-        if (token->type == ENDIF) {
+        if (token->type == ENDIF || token->type == ENDLOOP) {
             break;
         }
 
@@ -149,6 +155,9 @@ static ASTNode* parse_statements(TokenList *token_list, int *pos) {
                 break;
             case IF:
                 stmt = parse_if_statement(token_list, pos);
+                break;
+            case LOOP:
+                stmt = parse_loop_statements(token_list, pos);
                 break;
             default:
                 fprintf(stderr, "Syntax error: unexpected token %d\n", token->type);
