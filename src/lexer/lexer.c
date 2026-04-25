@@ -89,6 +89,7 @@ Token* get_number_token(FILE *file, int first_letter) {
 
     token->type = NUMBER;
     token->int_value = buffer;
+    token->string_value = NULL;
     return token;
 }
 

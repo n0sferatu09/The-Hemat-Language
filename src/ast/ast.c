@@ -50,6 +50,13 @@ void print_ast(ASTNode *node) {
             print_ast(node->next);
             break;
 
+        case LOOP_STATEMENT:
+            printf("LOOP\n");
+            print_ast(node->right);
+            printf("ENDLOOP;\n");
+            print_ast(node->next);
+            break;
+
         case NUMBER_LITERAL:
             printf("%lld", node->int_value);
             break;

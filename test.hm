@@ -1,7 +1,9 @@
 let x = 5535;
-if x then
+loop
     if x then
+        if x then
+            print x;
+        endif;
         print x;
     endif;
-    print x;
-endif;
+endloop;

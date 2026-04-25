@@ -195,6 +195,8 @@ void parser(FILE *file) {
             stmt = parse_print_statement(token_list, &pos);
         } else if (current_token->type == IF) {
             stmt = parse_if_statement(token_list, &pos);
+        } else if (current_token->type == LOOP) {
+            stmt = parse_loop_statements(token_list, &pos);
         } else {
             fprintf(stderr, "Unexpected token at position %d\n", pos);
             break;

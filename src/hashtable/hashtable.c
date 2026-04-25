@@ -56,6 +56,15 @@ int get_value(HashTable *hashtable, const char *key) {
     return -1;
 }
 
+int test(HashTable *hashtable) {
+    if (!hashtable) {
+        fprintf(stderr, "Hashtable is not exists!\n");
+        exit(-1);
+    }
+
+
+}
+
 void free_table(HashTable *hashtable) {
     for (int i = 0; i < hashtable->size; ++i) {
         Entry *entry = hashtable->buckets[i];
