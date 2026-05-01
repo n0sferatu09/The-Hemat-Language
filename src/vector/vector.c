@@ -58,6 +58,8 @@ void vector_clear(Vector *vector) {
     }
 }
 
+void test()
+
 void free_vector(Vector *vector) {
     if (vector) {
         free(vector->data);
