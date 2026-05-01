@@ -22,7 +22,7 @@ HashTable* create_table(int size) {
     return hashtable;
 }
 
-unsigned int hash(const char *str, int table_size) {
+unsigned int hash(const char *str, const int table_size) {
     unsigned long hash = 5381;
     while (*str) hash = ((hash << 5) + hash) + *str++;
     return hash % table_size;
@@ -54,15 +54,6 @@ int get_value(HashTable *hashtable, const char *key) {
     }
 
     return -1;
-}
-
-int test(HashTable *hashtable) {
-    if (!hashtable) {
-        fprintf(stderr, "Hashtable is not exists!\n");
-        exit(-1);
-    }
-
-
 }
 
 void free_table(HashTable *hashtable) {

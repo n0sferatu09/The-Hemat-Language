@@ -6,7 +6,7 @@ typedef enum {
     TOKEN_ERROR,
 
     // keywords
-    LET, IF, THEN, ENDIF, LOOP, ENDLOOP, PRINT,
+    LET, IF, THEN, ENDIF, LOOP, ENDLOOP, BREAK, PRINT,
 
     // user tokens
     ID, STRING, NUMBER,
@@ -23,10 +23,8 @@ typedef enum {
 
 typedef struct {
     TokenType type;
-    union {
-        long long int int_value;
-        char *string_value;
-    };
+    long long int int_value;
+    char *string_value;
 } Token;
 
 typedef struct {

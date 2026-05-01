@@ -1,8 +1,8 @@
 #ifndef HEMATC_PARSER_H
 #define HEMATC_PARSER_H
 
-#include <stdlib.h>
+#include "../ast/ast.h"
 
-void parser(FILE *file);
+ASTNode* parser(FILE *file);
 
 #endif //HEMATC_PARSER_H

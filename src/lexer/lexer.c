@@ -102,7 +102,6 @@ Token* get_operator_token(FILE *file, HashTable *operators, int first_symbol) {
         return NULL;
     }
 
-
     char buffer[3] = {0};
     buffer[0] = (char)first_symbol;
 

@@ -7,11 +7,13 @@
 #include "../lexer/lexer.h"
 #include "../ast/ast.h"
 
-static ASTNode* parse_expression(TokenList *token_list, int *pos);
-static ASTNode* parse_print_statement(TokenList *token_list, int *pos);
+static ASTNode* parse_primary(TokenList *token_list, int *pos);
+static ASTNode* parse_binary_expression(TokenList *token_list, int *pos, int min_precedence);
 static ASTNode* parse_let_statement(TokenList *token_list, int *pos);
 static ASTNode* parse_if_statement(TokenList *token_list, int *pos);
-static ASTNode* parse_loop_statements(TokenList *token_list, int *pos);
+static ASTNode* parse_loop_statement(TokenList *token_list, int *pos);
+static ASTNode* parse_print_statement(TokenList *token_list, int *pos);
+static ASTNode* parse_break_statement(TokenList *token_list, int *pos);
 static ASTNode* parse_statements(TokenList *token_list, int *pos);
 
 static Token* peek(TokenList *token_list, const int pos) {
@@ -34,13 +36,25 @@ static Token* consume(TokenList *token_list, int *pos, const TokenType token_typ
     return token;
 }
 
-static ASTNode* parse_expression(TokenList *token_list, int *pos) {
+static int get_precedence(const TokenType op) {
+    switch (op) {
+        case MULT: case DIV:
+            return 2;
+        case ADD: case SUB:
+            return 1;
+        case GT: case LT: case EQ: case NEQ:
+            return 0;
+        default:
+            return -1;
+    }
+}
+
+static ASTNode* parse_primary(TokenList *token_list, int *pos) {
     Token *token = peek(token_list, *pos);
     if (!token) return NULL;
 
     if (token->type == NUMBER) {
         consume(token_list, pos, NUMBER);
-
         ASTNode *node = create_node(NUMBER_LITERAL);
         node->int_value = token->int_value;
         return node;
@@ -48,7 +62,6 @@ static ASTNode* parse_expression(TokenList *token_list, int *pos) {
 
     if (token->type == STRING) {
         consume(token_list, pos, STRING);
-
         ASTNode *node = create_node(STRING_LITERAL);
         node->string_value = strdup(token->string_value);
         return node;
@@ -56,14 +69,61 @@ static ASTNode* parse_expression(TokenList *token_list, int *pos) {
 
     if (token->type == ID) {
         consume(token_list, pos, ID);
-
         ASTNode *node = create_node(IDENTIFIER);
         node->string_value = strdup(token->string_value);
         return node;
     }
 
-    fprintf(stderr, "Expected number or identifier, got %d\n", token->type);
+    if (token->type == LPAREN) {
+        consume(token_list, pos, LPAREN);
+        ASTNode *node = parse_binary_expression(token_list, pos, 0);
+        if (!node) return NULL;
+        consume(token_list, pos, RPAREN);
+        return node;
+    }
+
+    if (token->type == SUB) {
+        consume(token_list, pos, SUB);
+        ASTNode *node = parse_primary(token_list, pos);
+        if (!node) return NULL;
+        ASTNode *unary = create_node(UNARY_MINUS);
+        unary->right = node;
+        return unary;
+    }
+
+    fprintf(stderr, "Expected number, identifier, or (, got %d\n", token->type);
     return NULL;
+}
+
+static ASTNode* parse_binary_expression(TokenList *token_list, int *pos, int min_precedence) {
+    ASTNode *left = parse_primary(token_list, pos);
+    if (!left) return NULL;
+
+    while (*pos < token_list->count) {
+        Token *token = peek(token_list, *pos);
+        if (!token) break;
+
+        const int precedence = get_precedence(token->type);
+        if (precedence < min_precedence) break;
+
+        const TokenType op = token->type;
+        consume(token_list, pos, op);
+
+        ASTNode *right = parse_binary_expression(token_list, pos, precedence + 1);
+        if (!right) {
+            free_ast(left);
+            return NULL;
+        }
+
+        ASTNode *node = create_node(BINARY_EXPRESSION);
+        node->left = left;
+        node->right = right;
+        node->int_value = op;
+
+        left = node;
+    }
+
+    return left;
 }
 
 static ASTNode* parse_let_statement(TokenList *token_list, int *pos) {
@@ -73,7 +133,7 @@ static ASTNode* parse_let_statement(TokenList *token_list, int *pos) {
 
     consume(token_list, pos, ASSIGN);
 
-    ASTNode *expr = parse_expression(token_list, pos);
+    ASTNode *expr = parse_binary_expression(token_list, pos, 0);
     if (!expr) return NULL;
 
     consume(token_list, pos, SEMICOLON);
@@ -87,7 +147,7 @@ static ASTNode* parse_let_statement(TokenList *token_list, int *pos) {
 static ASTNode* parse_print_statement(TokenList *token_list, int *pos) {
     consume(token_list, pos, PRINT);
 
-    ASTNode *expr = parse_expression(token_list, pos);
+    ASTNode *expr = parse_binary_expression(token_list, pos, 0);
     if (!expr) return NULL;
 
     consume(token_list, pos, SEMICOLON);
@@ -99,7 +159,7 @@ static ASTNode* parse_print_statement(TokenList *token_list, int *pos) {
 static ASTNode* parse_if_statement(TokenList *token_list, int *pos) {
     consume(token_list, pos, IF);
 
-    ASTNode *condition = parse_expression(token_list, pos);
+    ASTNode *condition = parse_binary_expression(token_list, pos, 0);
     if (!condition) return NULL;
 
     consume(token_list, pos, THEN);
@@ -116,7 +176,7 @@ static ASTNode* parse_if_statement(TokenList *token_list, int *pos) {
     return node;
 }
 
-static ASTNode* parse_loop_statements(TokenList *token_list, int *pos) {
+static ASTNode* parse_loop_statement(TokenList *token_list, int *pos) {
     consume(token_list, pos, LOOP);
 
     ASTNode *body = parse_statements(token_list, pos);
@@ -127,6 +187,14 @@ static ASTNode* parse_loop_statements(TokenList *token_list, int *pos) {
     ASTNode *node = create_node(LOOP_STATEMENT);
     node->right = body;
 
+    return node;
+}
+
+static ASTNode* parse_break_statement(TokenList *token_list, int *pos) {
+    consume (token_list, pos, BREAK);
+    consume (token_list, pos, SEMICOLON);
+    ASTNode *node = create_node(BREAK_STATEMENT);
+    if (!node) return NULL;
     return node;
 }
 
@@ -157,7 +225,10 @@ static ASTNode* parse_statements(TokenList *token_list, int *pos) {
                 stmt = parse_if_statement(token_list, pos);
                 break;
             case LOOP:
-                stmt = parse_loop_statements(token_list, pos);
+                stmt = parse_loop_statement(token_list, pos);
+                break;
+            case BREAK:
+                stmt = parse_break_statement(token_list, pos);
                 break;
             default:
                 fprintf(stderr, "Syntax error: unexpected token %d\n", token->type);
@@ -177,7 +248,7 @@ static ASTNode* parse_statements(TokenList *token_list, int *pos) {
     return first;
 }
 
-void parser(FILE *file) {
+ASTNode* parser(FILE *file) {
     TokenList *token_list = lexer(file);
     int pos = 0;
 
@@ -196,7 +267,9 @@ void parser(FILE *file) {
         } else if (current_token->type == IF) {
             stmt = parse_if_statement(token_list, &pos);
         } else if (current_token->type == LOOP) {
-            stmt = parse_loop_statements(token_list, &pos);
+            stmt = parse_loop_statement(token_list, &pos);
+        } else if (current_token->type == BREAK) {
+            stmt = parse_break_statement(token_list, &pos);
         } else {
             fprintf(stderr, "Unexpected token at position %d\n", pos);
             break;
@@ -216,7 +289,6 @@ void parser(FILE *file) {
         }
     }
     print_ast(program);
-    free_ast(program);
 
-    free_token_list(token_list);
+    return program;
 }

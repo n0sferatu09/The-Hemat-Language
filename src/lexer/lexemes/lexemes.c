@@ -12,6 +12,7 @@ HashTable* init_keywords_table(void) {
     insert(table, "loop", LOOP);
     insert(table, "endloop", ENDLOOP);
     insert(table, "print", PRINT);
+    insert(table, "break", BREAK);
 
     return table;
 }

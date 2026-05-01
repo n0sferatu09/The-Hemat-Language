@@ -1,0 +1,4 @@
+#ifndef HEMATC_SEMANTIC_H
+#define HEMATC_SEMANTIC_H
+
+#endif //HEMATC_SEMANTIC_H

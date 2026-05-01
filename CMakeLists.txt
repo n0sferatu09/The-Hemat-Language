@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
-project(hematc C)
+project(hmc C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-add_executable(hematc
+add_executable(hmc
         src/main.c
         src/lexer/lexer.h
         src/hashtable/hashtable.c
@@ -20,6 +20,12 @@ add_executable(hematc
         src/parser/parser.h
         src/ast/ast.c
         src/ast/ast.h
+        src/semantic/semantic.c
+        src/semantic/semantic.h
+        src/symbol_table/symbol_table.c
+        src/symbol_table/symbol_table.h
+        src/codegen/codegen.c
+        src/codegen/codegen.h
 )
 
-target_compile_options(hematc PRIVATE -Wall -Wextra -g)
+target_compile_options(hmc PRIVATE -Wall -Wextra -g)

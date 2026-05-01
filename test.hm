@@ -1,9 +1,11 @@
-let x = 5535;
+let x = 1488;
+print x;
 loop
-    if x then
-        if x then
-            print x;
+    if x == 1500 then
+        if x != 1488 then
+            print "Not 1488";
         endif;
         print x;
     endif;
+    break;
 endloop;

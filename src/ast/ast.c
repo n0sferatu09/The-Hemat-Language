@@ -72,9 +72,29 @@ void print_ast(ASTNode *node) {
         case BINARY_EXPRESSION:
             printf("(");
             print_ast(node->left);
-            printf(" ? ");
+            switch (node->int_value) {
+                case ADD: printf(" + "); break;
+                case SUB: printf(" - "); break;
+                case MULT: printf(" * "); break;
+                case DIV: printf(" / "); break;
+                case GT: printf(" > "); break;
+                case LT: printf(" < "); break;
+                case EQ: printf(" == "); break;
+                case NEQ: printf(" != "); break;
+                default: printf(" ? "); break;
+            }
             print_ast(node->right);
             printf(")");
+            break;
+
+        case UNARY_MINUS:
+            printf("-");
+            print_ast(node->right);
+            break;
+
+        case BREAK_STATEMENT:
+            printf("BREAK;\n");
+            print_ast(node->next);
             break;
 
         default:
