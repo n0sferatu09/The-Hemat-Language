@@ -12,23 +12,27 @@ SymbolTable* create_symbol_table(void) {
     }
 
     symbol_table->size = TABLE_SIZE;
-    symbol_table->buckets = NULL;
+    symbol_table->buckets = calloc(symbol_table->size, sizeof(Symbol*));
+    if (!symbol_table->buckets) {
+        fprintf(stderr, "Memory allocation failed!\n");
+        exit(-1);
+    }
 
     return symbol_table;
 }
 
-unsigned int hash(const char *str, const int table_size) {
+static unsigned int hash(const char *str, const int table_size) {
     unsigned long hash = 5381;
     while (*str) hash = ((hash << 5) + hash) + *str++;
-    return hash / table_size;
+    return hash % table_size;
 }
 
 void symbol_table_insert(SymbolTable *symbol_table, const char *name, DataType type) {
     if (!symbol_table || !name) return;
 
-    unsigned int index = hash(name, TABLE_SIZE);
+    unsigned int index = hash(name, symbol_table->size);
 
-    Symbol *current = (Symbol *)malloc(sizeof(Symbol));
+    Symbol *current = symbol_table->buckets[index];
     while (current) {
         if (strcmp(current->name, name) == 0) {
             fprintf(stderr, "Error: variable '%s' already declared\n", name);
@@ -46,6 +50,34 @@ void symbol_table_insert(SymbolTable *symbol_table, const char *name, DataType t
 }
 
 Symbol* lookup_symbol(SymbolTable *symbol_table, const char *name) {
-    Symbol *symbol = (Symbol *)malloc(sizeof(Symbol));
+    if (!symbol_table || !name) return NULL;
 
+    unsigned int index = hash(name, symbol_table->size);
+    Symbol *current = symbol_table->buckets[index];
+
+    while (current) {
+        if (strcmp(current->name, name) == 0) {
+            return current;
+        }
+
+        current = current->next;
+    }
+
+    return NULL;
+}
+
+void free_symbol_table(SymbolTable *symbol_table) {
+    if (!symbol_table) return;
+
+    for (int i = 0; i < symbol_table->size; ++i) {
+        Symbol *symbol = symbol_table->buckets[i];
+        while (symbol) {
+            Symbol *next = symbol->next;
+            free(symbol->name);
+            free(symbol);
+            symbol = next;
+        }
+    }
+    free(symbol_table->buckets);
+    free(symbol_table);
 }
