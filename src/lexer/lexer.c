@@ -142,18 +142,6 @@ TokenList *lexer(FILE *file) {
         if (isspace(current)) {
             current = fgetc(file);
             continue;
-        }
-
-        if (current == '/') {
-            int next = fgetc(file);
-            if (next == '/') {
-                while ((current = fgetc(file)) != '\n' && current != EOF) {
-                    current = fgetc(file);
-                    continue;
-                }
-            } else {
-                ungetc(next, file);
-            }
 
         } else if (isalpha(current)) {
             Token *token = get_keyword_token(file, vector, keywords, current);

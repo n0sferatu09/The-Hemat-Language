@@ -81,3 +81,30 @@ void free_symbol_table(SymbolTable *symbol_table) {
     free(symbol_table->buckets);
     free(symbol_table);
 }
+
+void print_symbol_table(SymbolTable *symbol_table) {
+    if (!symbol_table) {
+        printf("Symbol table is NULL\n");
+        return;
+    }
+
+    printf("\n=== Symbol Table ===\n");
+    int count = 0;
+
+    for (int i = 0; i < symbol_table->size; ++i) {
+        Symbol *current = symbol_table->buckets[i];
+        while (current) {
+            printf("  %s -> %s\n",
+                   current->name,
+                   current->type == TYPE_INTEGER ? "INTEGER" :
+                   current->type == TYPE_STRING ? "STRING" : "UNKNOWN");
+            current = current->next;
+            count++;
+        }
+    }
+
+    if (count == 0) {
+        printf("  (empty)\n");
+    }
+    printf("===================\n\n");
+}

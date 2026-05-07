@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "ast.h"
 
+#include "../lexer/tokens/tokens.h"
+
 ASTNode* create_node(NodeType type) {
     ASTNode *node = (ASTNode *)malloc(sizeof(ASTNode));
     if (!node) {
@@ -9,6 +11,7 @@ ASTNode* create_node(NodeType type) {
         exit(-1);
     }
     node->type = type;
+    node->data_type = TYPE_UNKNOWN;
     node->next = NULL;
     node->left = NULL;
     node->right = NULL;
@@ -29,6 +32,13 @@ void print_ast(ASTNode *node) {
 
         case LET_STATEMENT:
             printf("LET %s = ", node->string_value);
+            print_ast(node->right);
+            printf(";\n");
+            print_ast(node->next);
+            break;
+
+        case ASSIGNMENT_STATEMENT:
+            printf("%s = ", node->string_value);
             print_ast(node->right);
             printf(";\n");
             print_ast(node->next);
@@ -98,7 +108,7 @@ void print_ast(ASTNode *node) {
             break;
 
         default:
-            printf("Unknown");
+            printf("Unknown\n");
     }
 }
 

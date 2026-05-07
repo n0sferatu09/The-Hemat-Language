@@ -1,11 +1,16 @@
 #ifndef HEMATC_AST_H
 #define HEMATC_AST_H
 
-#include "../lexer/tokens/tokens.h"
+typedef enum {
+    TYPE_UNKNOWN = 0,
+    TYPE_INTEGER,
+    TYPE_STRING,
+} DataType;
 
 typedef enum {
     PROGRAM,
     LET_STATEMENT,
+    ASSIGNMENT_STATEMENT,
     PRINT_STATEMENT,
     IF_STATEMENT,
     LOOP_STATEMENT,
@@ -19,6 +24,7 @@ typedef enum {
 
 typedef struct ASTNode{
     NodeType type;
+    DataType data_type;
     long long int int_value;
     char *string_value;
 

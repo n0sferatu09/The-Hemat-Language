@@ -103,10 +103,10 @@ static ASTNode* parse_binary_expression(TokenList *token_list, int *pos, int min
         Token *token = peek(token_list, *pos);
         if (!token) break;
 
-        const int precedence = get_precedence(token->type);
+        int precedence = get_precedence(token->type);
         if (precedence < min_precedence) break;
 
-        const TokenType op = token->type;
+        TokenType op = token->type;
         consume(token_list, pos, op);
 
         ASTNode *right = parse_binary_expression(token_list, pos, precedence + 1);
@@ -129,7 +129,7 @@ static ASTNode* parse_binary_expression(TokenList *token_list, int *pos, int min
 static ASTNode* parse_let_statement(TokenList *token_list, int *pos) {
     consume(token_list, pos, LET);
 
-    const Token *token = consume(token_list, pos, ID);
+    Token *token = consume(token_list, pos, ID);
 
     consume(token_list, pos, ASSIGN);
 
@@ -139,6 +139,19 @@ static ASTNode* parse_let_statement(TokenList *token_list, int *pos) {
     consume(token_list, pos, SEMICOLON);
 
     ASTNode *node = create_node(LET_STATEMENT);
+    node->string_value = strdup(token->string_value);
+    node->right = expr;
+    return node;
+}
+
+static ASTNode* parse_assignment_statement(TokenList *token_list, int *pos) {
+    Token *token = consume(token_list, pos, ID);
+    consume(token_list, pos, ASSIGN);
+    ASTNode *expr = parse_binary_expression(token_list, pos, 0);
+    if (!expr) return NULL;
+    consume(token_list, pos, SEMICOLON);
+
+    ASTNode *node = create_node(ASSIGNMENT_STATEMENT);
     node->string_value = strdup(token->string_value);
     node->right = expr;
     return node;
@@ -215,6 +228,9 @@ static ASTNode* parse_statements(TokenList *token_list, int *pos) {
         ASTNode *stmt = NULL;
 
         switch (token->type) {
+            case ID:
+                stmt = parse_assignment_statement(token_list, pos);
+                break;
             case LET:
                 stmt = parse_let_statement(token_list, pos);
                 break;
@@ -256,11 +272,12 @@ ASTNode* parser(FILE *file) {
     ASTNode *last_statement = NULL;
 
     while (pos < token_list->count) {
-        const Token *current_token = peek(token_list, pos);
+        Token *current_token = peek(token_list, pos);
 
         ASTNode *stmt = NULL;
-
-        if (current_token->type == LET) {
+        if (current_token->type == ID) {
+            stmt = parse_assignment_statement(token_list, &pos);
+        } else if (current_token->type == LET) {
             stmt = parse_let_statement(token_list, &pos);
         } else if (current_token->type == PRINT) {
             stmt = parse_print_statement(token_list, &pos);
@@ -288,7 +305,7 @@ ASTNode* parser(FILE *file) {
             last_statement = stmt;
         }
     }
-    print_ast(program);
+    // print_ast(program);
 
     return program;
 }
