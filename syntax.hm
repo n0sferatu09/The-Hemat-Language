@@ -1,8 +1,6 @@
-// Факториал (демонстрация цикла и условий)
+let hello = "Hello";
 let n = 5;
 let result = 1;
-
-let test = 5 / 1;
 
 loop
     if n == 0 then
@@ -12,5 +10,6 @@ loop
         n = n - 1;
 endloop;
 
+print hello;
 print "Factorial is: ";
 print result;
