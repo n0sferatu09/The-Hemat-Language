@@ -90,13 +90,13 @@ void codegen(ASTNode *node, FILE *output, int indent) {
 
         case PRINT_STATEMENT:
             if (node->data_type == TYPE_INTEGER) {
-                fprintf(output, "%*sprintf(\"%%lld\\n\", ", indent * 4, "");
+                fprintf(output, "%*sprintf(\"%%lld\", (long long int)", indent * 4, "");
                 codegen(node->right, output, indent);
                 fprintf(output, ");\n");
             }
 
             if (node->data_type == TYPE_STRING) {
-                fprintf(output, "%*sprintf(\"%%s\\n\", ", indent * 4, "");
+                fprintf(output, "%*sprintf(\"%%s\", ", indent * 4, "");
                 codegen(node->right, output, indent);
                 fprintf(output, ");\n");
             }

@@ -10,6 +10,8 @@ loop
         n = n - 1;
 endloop;
 
-print hello;
-print "Factorial is: ";
+print "Factorial is ";
 print result;
+print "\n";
+print hello;
+print "\n";

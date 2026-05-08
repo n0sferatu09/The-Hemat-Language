@@ -26,6 +26,8 @@ add_executable(hmc
         src/symbol_table/symbol_table.h
         src/codegen/codegen.c
         src/codegen/codegen.h
+        src/command_parser/command_parser.c
+        src/command_parser/command_parser.h
 )
 
 target_compile_options(hmc PRIVATE -Wall -Wextra -g)
