@@ -30,4 +30,5 @@ add_executable(hmc
         src/command_parser/command_parser.h
 )
 
+target_include_directories(hmc PRIVATE src)
 target_compile_options(hmc PRIVATE -Wall -Wextra -g)
