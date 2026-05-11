@@ -33,11 +33,11 @@ let n = 12345;
 let sum = 0;
 
 loop
-if n == 0 then
-break;
-endif;
-sum = sum + (n - (n / 10) * 10);
-n = n / 10;
+    if n == 0 then
+        break;
+    endif;
+    sum = sum + (n - (n / 10) * 10);
+    n = n / 10;
 endloop;
 
 print "Sum of digits: ";
